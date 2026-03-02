@@ -28,17 +28,17 @@ const accentLineStyle = {
 } as const;
 
 const bluePickEmptyBg = 'linear-gradient(180deg, rgba(13,71,161,0.2) 0%, rgba(10,10,20,0.85) 100%)';
-const redPickEmptyBg  = 'linear-gradient(180deg, rgba(183,28,28,0.2) 0%, rgba(10,10,20,0.85) 100%)';
-const bluePlayerBar   = 'linear-gradient(to top, rgba(13,71,161,0.92) 0%, rgba(13,71,161,0.3) 60%, transparent 100%)';
-const redPlayerBar    = 'linear-gradient(to top, rgba(183,28,28,0.92) 0%, rgba(183,28,28,0.3) 60%, transparent 100%)';
-const banDiagOverlay  = 'linear-gradient(to bottom right, transparent 45%, rgba(229,57,53,0.35) 45%, rgba(229,57,53,0.35) 55%, transparent 55%)';
-const centerTopBar    = 'linear-gradient(90deg, #1a73e8, #9c27b0, #e53935)';
-const centerPanelBg   = 'rgba(5,5,15,0.95)';
+const redPickEmptyBg = 'linear-gradient(180deg, rgba(183,28,28,0.2) 0%, rgba(10,10,20,0.85) 100%)';
+const bluePlayerBar = 'linear-gradient(to top, rgba(13,71,161,0.92) 0%, rgba(13,71,161,0.3) 60%, transparent 100%)';
+const redPlayerBar = 'linear-gradient(to top, rgba(183,28,28,0.92) 0%, rgba(183,28,28,0.3) 60%, transparent 100%)';
+const banDiagOverlay = 'linear-gradient(to bottom right, transparent 45%, rgba(229,57,53,0.35) 45%, rgba(229,57,53,0.35) 55%, transparent 55%)';
+const centerTopBar = 'linear-gradient(90deg, #1a73e8, #9c27b0, #e53935)';
+const centerPanelBg = 'rgba(5,5,15,0.95)';
 
 // ====== SETUP SCREEN ======
 function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: string) => void; transparent?: boolean }) {
     const [blueTeam, setBlueTeam] = useState<TeamShort>('GAM');
-    const [redTeam, setRedTeam]   = useState<TeamShort>('SGP');
+    const [redTeam, setRedTeam] = useState<TeamShort>('SGP');
 
     return (
         <div className={`w-screen h-screen flex flex-col items-center justify-center gap-10 ${transparent ? 'bg-transparent' : 'bg-[rgba(5,5,15,0.98)]'}`}>
@@ -54,11 +54,10 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                     <div className="grid grid-cols-4 gap-2">
                         {TEAMS.map(t => (
                             <button key={t} onClick={() => setBlueTeam(t)}
-                                className={`flex flex-col items-center gap-1 p-2 rounded border-2 transition-all duration-150 ${
-                                    blueTeam === t
+                                className={`flex flex-col items-center gap-1 p-2 rounded border-2 transition-all duration-150 ${blueTeam === t
                                         ? 'border-[#64b5f6] bg-[#1a73e8]/20 scale-105 shadow-[0_0_12px_rgba(100,181,246,0.5)]'
                                         : 'border-white/10 bg-white/5 hover:border-white/30'
-                                }`}
+                                    }`}
                             >
                                 <img src={getTeamLogoUrl(t, 'C')} alt={t} className="w-12 h-12 object-contain" />
                                 <span className="text-[11px] font-semibold text-white/80" style={{ fontFamily: "'Oswald', sans-serif" }}>{t}</span>
@@ -78,11 +77,10 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                     <div className="grid grid-cols-4 gap-2">
                         {TEAMS.map(t => (
                             <button key={t} onClick={() => setRedTeam(t)}
-                                className={`flex flex-col items-center gap-1 p-2 rounded border-2 transition-all duration-150 ${
-                                    redTeam === t
+                                className={`flex flex-col items-center gap-1 p-2 rounded border-2 transition-all duration-150 ${redTeam === t
                                         ? 'border-[#ef5350] bg-[#e53935]/20 scale-105 shadow-[0_0_12px_rgba(239,83,80,0.5)]'
                                         : 'border-white/10 bg-white/5 hover:border-white/30'
-                                }`}
+                                    }`}
                             >
                                 <img src={getTeamLogoUrl(t, 'C')} alt={t} className="w-12 h-12 object-contain" />
                                 <span className="text-[11px] font-semibold text-white/80" style={{ fontFamily: "'Oswald', sans-serif" }}>{t}</span>
@@ -101,11 +99,10 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                 <button
                     onClick={() => onStart(blueTeam, redTeam)}
                     disabled={blueTeam === redTeam}
-                    className={`px-12 py-3 rounded font-bold uppercase tracking-widest text-lg transition-all duration-200 ${
-                        blueTeam === redTeam
+                    className={`px-12 py-3 rounded font-bold uppercase tracking-widest text-lg transition-all duration-200 ${blueTeam === redTeam
                             ? 'bg-white/10 text-white/30 cursor-not-allowed'
                             : 'bg-gradient-to-r from-[#1a73e8] via-[#9c27b0] to-[#e53935] text-white shadow-[0_0_24px_rgba(156,39,176,0.6)] hover:shadow-[0_0_36px_rgba(156,39,176,0.9)] hover:scale-105'
-                    }`}
+                        }`}
                     style={{ fontFamily: "'Oswald', sans-serif" }}
                 >
                     {blueTeam === redTeam ? 'CHỌN 2 ĐỘI KHÁC NHAU' : '▶ BẮT ĐẦU DRAFT'}
@@ -216,9 +213,8 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
                 <>
                     <img
                         key={pick.championFileName ?? ('preview-' + displayChamp.fileName)}
-                        className={`absolute inset-0 w-full h-full object-cover block z-[2] ${
-                            isPreview ? 'opacity-60' : 'animate-zoom-fade-lock'
-                        }`}
+                        className={`absolute inset-0 w-full h-full object-cover block z-[2] ${isPreview ? 'opacity-60' : 'animate-zoom-fade-lock'
+                            }`}
                         style={{ objectPosition: 'center 20%' }}
                         src={getChampImageUrl(displayChamp, 'pick')}
                         alt={displayChamp.displayName}
@@ -268,7 +264,7 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
 export default function BanPickOverlay({ transparent = false }: { transparent?: boolean }) {
     const [screen, setScreen] = useState<'setup' | 'draft'>('setup');
     const [blue, setBlue] = useState<TeamData>(emptyTeam('GAM'));
-    const [red, setRed]   = useState<TeamData>(emptyTeam('SGP'));
+    const [red, setRed] = useState<TeamData>(emptyTeam('SGP'));
     const [pool, setPool] = useState(CHAMPIONS);
     const [actionIndex, setActionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);

@@ -67,7 +67,7 @@ export type TeamShort = typeof TEAMS[number];
 export const MATCH_TITLE = 'GROUP\nSTAGE 1';
 export const BEST_OF = 5;
 
-const DEFAULT_NAMES = ['Player1', 'Player2', 'Player3', 'Player4', 'Player5'];
+const DEFAULT_NAMES = ['SGP KHOA', 'SGP BANG', 'SGP FISH', 'SGP YIWEIZ', 'SGP YULTAN'];
 
 export function emptyTeam(shortName: string): TeamState {
     return {

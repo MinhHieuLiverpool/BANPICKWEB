@@ -44,28 +44,28 @@ function BanCard({ ban, side, isActive, previewFileName }: {
             )}
             {ban.championFileName && (() => {
                 const cd = CHAMPIONS.find(c => c.fileName === ban.championFileName);
-                return (<>
+                return (
                     <img key={ban.championFileName}
-                        className="absolute inset-0 w-full h-full object-cover z-[1]"
+                        className="absolute inset-0 w-full h-full object-cover z-[1] animate-zoom-fade-ban"
                         src={cd ? getChampImageUrl(cd, 'ban_gray') : getChampImageUrl(ban.championFileName, 'ban_gray')}
                         alt="" />
-                    {/* X mark — two thin white diagonal lines */}
-                    <div className="absolute inset-0 pointer-events-none z-[3]">
-                        <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'rotate(45deg)' }}>
-                            <div className="absolute top-1/2 left-0 w-[141%] h-[1px] bg-white/70" style={{ marginLeft: '-20%', marginTop: '-0.5px' }} />
-                        </div>
-                        <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'rotate(-45deg)' }}>
-                            <div className="absolute top-1/2 left-0 w-[141%] h-[1px] bg-white/70" style={{ marginLeft: '-20%', marginTop: '-0.5px' }} />
-                        </div>
-                    </div>
-                </>);
+                );
             })()}
-            {/* Layer 2: blur — only show when slot is empty (no preview, no locked) */}
-            {!ban.championFileName && !preview && (
+            {/* X mark — always visible on all ban slots */}
+            <div className="absolute inset-0 pointer-events-none z-[3]">
+                <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'rotate(45deg)' }}>
+                    <div className="absolute top-1/2 left-0 w-[141%] h-[1px] bg-white/70" style={{ marginLeft: '-20%', marginTop: '-0.5px' }} />
+                </div>
+                <div className="absolute top-0 left-0 w-full h-full" style={{ transform: 'rotate(-45deg)' }}>
+                    <div className="absolute top-1/2 left-0 w-[141%] h-[1px] bg-white/70" style={{ marginLeft: '-20%', marginTop: '-0.5px' }} />
+                </div>
+            </div>
+            {/* Layer 2: blur — show when empty OR active (pulse when active) */}
+            {(!ban.championFileName) && (
                 <img
                     src={banBlurImg}
                     alt=""
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] opacity-50"
+                    className={`absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] ${isActive ? 'animate-ban-blink' : 'opacity-50'}`}
                     draggable={false}
                 />
             )}
@@ -95,11 +95,10 @@ function PickCard({ pick, side, isActive, previewFileName }: {
     const isPreview = !!previewChamp && !lockedChamp;
 
     return (
-        <div className="relative w-[170px] h-[236px] shrink-0 overflow-hidden"
+        <div className={`relative w-[170px] h-[236px] shrink-0 overflow-hidden ${isActive && !lockedChamp ? 'animate-pick-frame' : ''}`}
             style={{
                 borderRight: '1px solid rgba(255,255,255,0.15)',
-                borderBottom: isPreview ? '3px solid #eab308' : '2px solid rgba(255,255,255,0.18)',
-                boxShadow: isPreview ? 'inset 0 0 20px rgba(234,179,8,0.25)' : undefined,
+                borderBottom: '2px solid rgba(255,255,255,0.18)',
             }}>
             {/* z-0: nền — PICK.png slot background */}
             <img
@@ -117,15 +116,16 @@ function PickCard({ pick, side, isActive, previewFileName }: {
                     src={getChampImageUrl(displayChamp, 'pick')}
                     alt={displayChamp.displayName}
                 />
-                {isPreview && (
-                    <div className="absolute inset-0 animate-pulse pointer-events-none z-[3] ring-2 ring-yellow-400 ring-inset" />
-                )}
                 {!isPreview && (<>
                     <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-flash bg-white" />
                     <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-glow"
                         style={{ boxShadow: 'inset 0 0 0 3px rgba(255,220,0,0.95), 0 0 40px 12px rgba(255,200,0,0.5)' }} />
                 </>)}
             </>)}
+            {/* Pick active — horizontal sweep */}
+            {isActive && !lockedChamp && (
+                <div className="absolute inset-0 pointer-events-none z-[3] animate-pick-sweep" />
+            )}
             {/* z-2: blur — color blur on top of champion */}
             <img
                 src={blurImg}
@@ -136,15 +136,15 @@ function PickCard({ pick, side, isActive, previewFileName }: {
 
             {/* Player name — at bottom, on blur layer */}
             <div className="absolute bottom-0 left-0 right-0 py-2 px-1 text-center text-white uppercase tracking-[2px] z-[5]"
-                style={{ fontFamily: "'946 Latin Wide', sans-serif", fontSize: '14px', fontWeight: 400, textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
+                style={{ fontFamily: "'946 Latin Wide', sans-serif", fontSize: '12px', fontWeight: 600, textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
                 {pick.playerName}
             </div>
 
-            {/* Lane icon — only when no champion locked */}
-            {!lockedChamp && (
-                <img className="absolute top-[8px] w-10 h-10 opacity-80 z-[3]"
+            {/* Lane icon — only when no champion displayed */}
+            {!displayChamp && (
+                <img className="absolute top-[7px] w-8 h-8 opacity-80 z-[3]"
                     style={{
-                        [isBlue ? 'left' : 'right']: '8px',
+                        [isBlue ? 'left' : 'right']: '7px',
                         filter: 'brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.8))',
                     }}
                     src={getLaneIconUrl(pick.lane)} alt={pick.lane} />
