@@ -35,10 +35,15 @@ const banDiagOverlay = 'linear-gradient(to bottom right, transparent 45%, rgba(2
 const centerTopBar = 'linear-gradient(90deg, #1a73e8, #9c27b0, #e53935)';
 const centerPanelBg = 'rgba(5,5,15,0.95)';
 
+const LANE_LABELS = ['DSL', 'JG', 'MID', 'ADL', 'SUP'];
+const DEFAULT_NAMES = ['SGP KHOA', 'SGP BANG', 'SGP FISH', 'SGP YIWEIZ', 'SGP YULTAN'];
+
 // ====== SETUP SCREEN ======
-function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: string) => void; transparent?: boolean }) {
+function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: string, blueNames: string[], redNames: string[]) => void; transparent?: boolean }) {
     const [blueTeam, setBlueTeam] = useState<TeamShort>('GAM');
     const [redTeam, setRedTeam] = useState<TeamShort>('SGP');
+    const [blueNames, setBlueNames] = useState(['', '', '', '', '']);
+    const [redNames, setRedNames] = useState(DEFAULT_NAMES);
 
     return (
         <div className={`w-screen h-screen flex flex-col items-center justify-center gap-10 ${transparent ? 'bg-transparent' : 'bg-[rgba(5,5,15,0.98)]'}`}>
@@ -64,6 +69,21 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                             </button>
                         ))}
                     </div>
+                    {/* Player name inputs */}
+                    <div className="flex flex-col gap-1.5 w-full">
+                        {LANE_LABELS.map((lane, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <span className="text-[10px] text-[#64b5f6]/70 font-bold w-8 text-right shrink-0" style={{ fontFamily: "'Oswald', sans-serif" }}>{lane}</span>
+                                <input
+                                    value={blueNames[i]}
+                                    onChange={e => setBlueNames(prev => prev.map((n, j) => j === i ? e.target.value : n))}
+                                    placeholder={`Tên tuyển thủ`}
+                                    className="flex-1 bg-white/5 border border-[#1a73e8]/30 rounded px-2 py-1 text-white text-xs placeholder-white/20 uppercase tracking-widest focus:outline-none focus:border-[#64b5f6]"
+                                    style={{ fontFamily: "'Oswald', sans-serif" }}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* VS divider */}
@@ -87,6 +107,21 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                             </button>
                         ))}
                     </div>
+                    {/* Player name inputs */}
+                    <div className="flex flex-col gap-1.5 w-full">
+                        {LANE_LABELS.map((lane, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <span className="text-[10px] text-[#ef5350]/70 font-bold w-8 text-right shrink-0" style={{ fontFamily: "'Oswald', sans-serif" }}>{lane}</span>
+                                <input
+                                    value={redNames[i]}
+                                    onChange={e => setRedNames(prev => prev.map((n, j) => j === i ? e.target.value : n))}
+                                    placeholder={`Tên tuyển thủ`}
+                                    className="flex-1 bg-white/5 border border-[#e53935]/30 rounded px-2 py-1 text-white text-xs placeholder-white/20 uppercase tracking-widest focus:outline-none focus:border-[#ef5350]"
+                                    style={{ fontFamily: "'Oswald', sans-serif" }}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -97,7 +132,7 @@ function SetupScreen({ onStart, transparent }: { onStart: (blue: string, red: st
                     <span className="text-[#64b5f6] font-bold text-xl tracking-widest" style={{ fontFamily: "'Oswald', sans-serif" }}>{blueTeam}</span>
                 </div>
                 <button
-                    onClick={() => onStart(blueTeam, redTeam)}
+                    onClick={() => onStart(blueTeam, redTeam, blueNames, redNames)}
                     disabled={blueTeam === redTeam}
                     className={`px-12 py-3 rounded font-bold uppercase tracking-widest text-lg transition-all duration-200 ${blueTeam === redTeam
                             ? 'bg-white/10 text-white/30 cursor-not-allowed'
@@ -175,7 +210,7 @@ function BanCard({ ban, filled, previewChamp }: { ban: BanData; filled: boolean;
 }
 
 // ====== PICK CARD ======
-function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' | 'red'; previewChamp?: ChampionData | null }) {
+function PickCard({ pick, side, previewChamp, isActive, onPlayerNameChange }: { pick: PickData; side: 'blue' | 'red'; previewChamp?: ChampionData | null; isActive?: boolean; onPlayerNameChange?: (name: string) => void }) {
     const isBlue = side === 'blue';
     const borderBottom = isBlue ? '3px solid #1a73e8' : '3px solid #e53935';
     const playerBarBg = isBlue ? bluePlayerBar : redPlayerBar;
@@ -185,6 +220,8 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
         ? (CHAMPIONS.find(c => c.fileName === pick.championFileName) ?? null)
         : (previewChamp ?? null);
     const isPreview = !pick.championFileName && !!previewChamp;
+    // Show effect video when this slot is actively being drafted and champion not yet locked
+    const showEffect = !!isActive && !pick.championFileName;
 
     return (
         <div
@@ -194,21 +231,41 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
                 boxShadow: isPreview ? 'inset 0 0 20px rgba(234,179,8,0.25)' : undefined,
             }}
         >
-            {/* PICK.png — slot background */}
+            {/* z-[0]: PICK.png — slot frame (bottom layer) */}
             <img
                 src="/assets/layout/PICK.png"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[0]"
                 draggable={false}
             />
-            {/* blur color at bottom */}
-            <img
-                src={blurImg}
-                alt=""
-                className="absolute bottom-0 left-0 right-0 w-full h-2/3 object-cover object-bottom pointer-events-none z-[1]"
-                draggable={false}
-            />
 
+            {/* z-[1]: Effect video — shown when this slot is actively being drafted */}
+            {showEffect && (
+                <video
+                    ref={el => {
+                        if (!el) return;
+                        el.play().catch(() => {});
+                        let raf: number;
+                        const loop = () => {
+                            if (el.duration && el.currentTime >= el.duration - 0.08) {
+                                el.currentTime = 0;
+                            }
+                            raf = requestAnimationFrame(loop);
+                        };
+                        raf = requestAnimationFrame(loop);
+                        (el as any).__raf_cleanup = () => cancelAnimationFrame(raf);
+                    }}
+                    onAbort={e => { (e.currentTarget as any).__raf_cleanup?.(); }}
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[1]"
+                    src="/assets/effect/effect.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                />
+            )}
+
+            {/* z-[2]: Champion image — when locked, covers the video */}
             {displayChamp ? (
                 <>
                     <img
@@ -224,16 +281,16 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
                     )}
                     {!isPreview && (
                         <>
-                            <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-flash bg-white" />
-                            <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-glow" style={{ boxShadow: 'inset 0 0 0 3px rgba(255,220,0,0.95), 0 0 40px 12px rgba(255,200,0,0.5)' }} />
+                            <div className="absolute inset-0 pointer-events-none z-[6] animate-champ-flash bg-white" />
+                            <div className="absolute inset-0 pointer-events-none z-[6] animate-champ-glow" style={{ boxShadow: 'inset 0 0 0 3px rgba(255,220,0,0.95), 0 0 40px 12px rgba(255,200,0,0.5)' }} />
                         </>
                     )}
                 </>
             ) : null}
 
-            {/* lane icon */}
+            {/* z-[5]: Lane icon */}
             <img
-                className="absolute top-[6px] w-5 h-5 opacity-80 z-[3]"
+                className="absolute top-[6px] w-5 h-5 opacity-80 z-[5]"
                 style={{
                     [isBlue ? 'left' : 'right']: '6px',
                     filter: 'brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.8))',
@@ -242,9 +299,9 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
                 alt={pick.lane}
             />
 
-            {/* player name bar */}
-            <div
-                className="absolute bottom-0 left-0 right-0 py-2 px-1.5 text-center text-white uppercase tracking-[2px] z-[3]"
+            {/* z-[4]: Player name bar */}
+            <input
+                className="absolute bottom-0 left-0 right-0 py-2 px-1.5 text-center text-white uppercase tracking-[2px] z-[4] bg-transparent border-none outline-none placeholder-white/30 w-full"
                 style={{
                     fontFamily: "'Oswald', sans-serif",
                     fontSize: '15px',
@@ -252,9 +309,10 @@ function PickCard({ pick, side, previewChamp }: { pick: PickData; side: 'blue' |
                     textShadow: '0 2px 6px rgba(0,0,0,0.9)',
                     background: playerBarBg,
                 }}
-            >
-                {pick.playerName}
-            </div>
+                value={pick.playerName}
+                placeholder="Tên tuyển thủ"
+                onChange={e => onPlayerNameChange?.(e.target.value)}
+            />
 
         </div>
     );
@@ -322,9 +380,13 @@ export default function BanPickOverlay({ transparent = false }: { transparent?: 
 
     if (screen === 'setup') {
         return (
-            <SetupScreen transparent={transparent} onStart={(b, r) => {
-                setBlue(emptyTeam(b));
-                setRed(emptyTeam(r));
+            <SetupScreen transparent={transparent} onStart={(b, r, bNames, rNames) => {
+                const bTeam = emptyTeam(b);
+                const rTeam = emptyTeam(r);
+                bNames.forEach((name, i) => { bTeam.picks[i].playerName = name; });
+                rNames.forEach((name, i) => { rTeam.picks[i].playerName = name; });
+                setBlue(bTeam);
+                setRed(rTeam);
                 setPool(CHAMPIONS);
                 setActionIndex(0);
                 setTimeLeft(60);
@@ -455,7 +517,7 @@ export default function BanPickOverlay({ transparent = false }: { transparent?: 
             {/* ── BAN SECTION ── */}
             <div className="absolute left-0 right-0 flex items-center z-[6]" style={{ bottom: '252px', height: '72px' }}>
                 {/* blue bans (left) */}
-                <div className="absolute left-4 flex items-center gap-[5px]">
+                <div className="absolute left-0 flex items-center gap-0">
                     {blue.bans.map((b, i) => (
                         <BanCard
                             key={i} ban={b} filled={!!b.championFileName}
@@ -464,7 +526,7 @@ export default function BanPickOverlay({ transparent = false }: { transparent?: 
                     ))}
                 </div>
                 {/* red bans (right, reversed) */}
-                <div className="absolute right-4 flex flex-row-reverse items-center gap-[5px]">
+                <div className="absolute right-0 flex flex-row-reverse items-center gap-0">
                     {red.bans.map((b, i) => (
                         <BanCard
                             key={i} ban={b} filled={!!b.championFileName}
@@ -485,12 +547,21 @@ export default function BanPickOverlay({ transparent = false }: { transparent?: 
 
                 {/* Blue picks */}
                 <div className="flex flex-row shrink-0">
-                    {blue.picks.map((p, i) => (
-                        <PickCard
-                            key={i} pick={p} side="blue"
-                            previewChamp={currentAction?.team === 'blue' && currentAction?.phase === 'pick' && currentAction?.slot === i ? selectedChamp : null}
-                        />
-                    ))}
+                    {blue.picks.map((p, i) => {
+                        const isSlotActive = currentAction?.team === 'blue' && currentAction?.phase === 'pick' && currentAction?.slot === i;
+                        return (
+                            <PickCard
+                                key={i} pick={p} side="blue"
+                                previewChamp={isSlotActive ? selectedChamp : null}
+                                isActive={isSlotActive}
+                                onPlayerNameChange={name => setBlue(prev => {
+                                    const picks = [...prev.picks];
+                                    picks[i] = { ...picks[i], playerName: name };
+                                    return { ...prev, picks };
+                                })}
+                            />
+                        );
+                    })}
                 </div>
 
                 {/* Center panel */}
@@ -537,12 +608,21 @@ export default function BanPickOverlay({ transparent = false }: { transparent?: 
 
                 {/* Red picks */}
                 <div className="flex flex-row-reverse shrink-0">
-                    {red.picks.map((p, i) => (
-                        <PickCard
-                            key={i} pick={p} side="red"
-                            previewChamp={currentAction?.team === 'red' && currentAction?.phase === 'pick' && currentAction?.slot === i ? selectedChamp : null}
-                        />
-                    ))}
+                    {red.picks.map((p, i) => {
+                        const isSlotActive = currentAction?.team === 'red' && currentAction?.phase === 'pick' && currentAction?.slot === i;
+                        return (
+                            <PickCard
+                                key={i} pick={p} side="red"
+                                previewChamp={isSlotActive ? selectedChamp : null}
+                                isActive={isSlotActive}
+                                onPlayerNameChange={name => setRed(prev => {
+                                    const picks = [...prev.picks];
+                                    picks[i] = { ...picks[i], playerName: name };
+                                    return { ...prev, picks };
+                                })}
+                            />
+                        );
+                    })}
                 </div>
             </div>
         </div>

@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { getChampImageUrl, getTeamLogoUrl, getLaneIconUrl, CHAMPIONS } from '../data/champions';
 import type { ChampionData } from '../data/champions';
+import '../styles/pick-effects.scss';
+import '../styles/lock-effects.scss';
 import {
     type SharedDraftState, type TeamState, type PickData, type BanData,
     createChannel, loadState, saveState,
@@ -93,48 +95,102 @@ function PickCard({ pick, side, isActive, previewFileName }: {
 
     const displayChamp = lockedChamp ?? previewChamp;
     const isPreview = !!previewChamp && !lockedChamp;
+    const isLocked = !!lockedChamp;
+    const hasChampion = !!displayChamp;
+
+    const activeClass = isActive && !hasChampion
+        ? (isBlue ? 'pick-slot--active-blue' : 'pick-slot--active-red')
+        : '';
+    const lockedClass = lockedChamp ? 'pick-slot--locked' : '';
 
     return (
-        <div className={`relative w-[170px] h-[236px] shrink-0 overflow-hidden ${isActive && !lockedChamp ? 'animate-pick-frame' : ''}`}
+        <div
+            className={`relative w-[170px] h-[236px] shrink-0 overflow-hidden ${activeClass} ${lockedClass}`}
             style={{
                 borderRight: '1px solid rgba(255,255,255,0.15)',
-                borderBottom: '2px solid rgba(255,255,255,0.18)',
-            }}>
-            {/* z-0: nền — PICK.png slot background */}
+                borderBottom: isActive && !lockedChamp
+                    ? `2px solid ${isBlue ? 'rgba(0,200,255,0.6)' : 'rgba(255,58,58,0.6)'}`
+                    : '2px solid rgba(255,255,255,0.18)',
+            }}
+        >
+            {/* z-[0]: Frame — PICK.png slot background */}
             <img
                 src="/assets/layout/PICK.png"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[0]"
                 draggable={false}
             />
-            {/* z-1: ảnh — champion image */}
-            {displayChamp && (<>
-                <img
-                    key={pick.championFileName ?? ('pre-' + displayChamp.fileName)}
-                    className={`w-full h-full object-cover block absolute inset-0 z-[1] ${isPreview ? 'opacity-60' : 'animate-zoom-fade-lock'}`}
-                    style={{ objectPosition: 'center 20%' }}
-                    src={getChampImageUrl(displayChamp, 'pick')}
-                    alt={displayChamp.displayName}
-                />
-                {!isPreview && (<>
-                    <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-flash bg-white" />
-                    <div className="absolute inset-0 pointer-events-none z-[4] animate-champ-glow"
-                        style={{ boxShadow: 'inset 0 0 0 3px rgba(255,220,0,0.95), 0 0 40px 12px rgba(255,200,0,0.5)' }} />
-                </>)}
-            </>)}
-            {/* Pick active — horizontal sweep */}
-            {isActive && !lockedChamp && (
-                <div className="absolute inset-0 pointer-events-none z-[3] animate-pick-sweep" />
-            )}
-            {/* z-2: blur — color blur on top of champion */}
-            <img
-                src={blurImg}
-                alt=""
-                className="absolute bottom-0 left-0 right-0 w-full h-2/3 object-cover object-bottom pointer-events-none z-[2]"
-                draggable={false}
-            />
 
-            {/* Player name — at bottom, on blur layer */}
+            {/* Active state CSS effects (replaces video) */}
+            {isActive && !hasChampion && (
+                <>
+                    {/* Inner ambient glow */}
+                    <div className="pick-inner-glow" />
+
+                    {/* 3D depth layers */}
+                    <div className="pick-electric-layer" />
+                    <div className="pick-depth-layer" />
+
+                    {/* 4 corner accent brackets */}
+                    <div className="pick-corner pick-corner--tl" />
+                    <div className="pick-corner pick-corner--tr" />
+                    <div className="pick-corner pick-corner--bl" />
+                    <div className="pick-corner pick-corner--br" />
+                </>
+            )}
+
+            {/* z-[2]: Champion image */}
+            {displayChamp && (
+                <>
+                    <img
+                        key={pick.championFileName ?? ('pre-' + displayChamp.fileName)}
+                        className={`w-full h-full object-cover block absolute inset-0 z-[2] ${isLocked ? 'animate-zoom-fade-lock' : 'pick-champ-bounce'}`}
+                        style={{ objectPosition: 'center 20%' }}
+                        src={getChampImageUrl(displayChamp, 'pick')}
+                        alt={displayChamp.displayName}
+                    />
+                    {/* Locked: scan lines, burst, ring, flash */}
+                    {!isPreview && (
+                        <>
+                            <div className="pick-lock-panel">
+                                <div className="pick-lock-panel-left" />
+                                <div className="pick-lock-panel-right" />
+                            </div>
+                            <div className="pick-lock-text">PICK</div>
+                            <div className="pick-lock-decor">
+                                <div className="pick-lock-decor-line pick-lock-decor-line--top" />
+                                <div className="pick-lock-decor-line pick-lock-decor-line--bottom" />
+                                <div className="pick-lock-decor-corner pick-lock-decor-corner--tl" />
+                                <div className="pick-lock-decor-corner pick-lock-decor-corner--tr" />
+                                <div className="pick-lock-decor-corner pick-lock-decor-corner--bl" />
+                                <div className="pick-lock-decor-corner pick-lock-decor-corner--br" />
+                                <div className="pick-lock-decor-dots" />
+                                <div className="pick-lock-decor-chev pick-lock-decor-chev--left" />
+                                <div className="pick-lock-decor-chev pick-lock-decor-chev--right" />
+                                <div className="pick-lock-decor-ticks pick-lock-decor-ticks--left" />
+                                <div className="pick-lock-decor-ticks pick-lock-decor-ticks--right" />
+                                <div className="pick-lock-decor-slasher" />
+                            </div>
+                            <div className="pick-scanlines-overlay" />
+                            <div className="pick-burst-overlay" />
+                            <div className="pick-ring-overlay" />
+                            <div className="pick-flash-overlay" />
+                        </>
+                    )}
+                </>
+            )}
+
+            {/* Player placeholder when no champion */}
+            {!displayChamp && (
+                <img
+                    className={`w-full object-cover block absolute left-0 right-0 z-[7] scale-[1.16] ${isActive ? 'pick-champ-bounce' : ''}`}
+                    style={{ height: '140%', marginTop: '10%', objectPosition: 'center 45%' }}
+                    src="/assets/player-placeholder.png"
+                    alt=""
+                />
+            )}
+
+            {/* z-[5]: Player name */}
             <div className="absolute bottom-0 left-0 right-0 py-2 px-1 text-center text-white uppercase tracking-[2px] z-[5]"
                 style={{ fontFamily: "'946 Latin Wide', sans-serif", fontSize: '12px', fontWeight: 600, textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}>
                 {pick.playerName}
@@ -142,14 +198,13 @@ function PickCard({ pick, side, isActive, previewFileName }: {
 
             {/* Lane icon — only when no champion displayed */}
             {!displayChamp && (
-                <img className="absolute top-[7px] w-8 h-8 opacity-80 z-[3]"
+                <img className="absolute top-[7px] w-8 h-8 opacity-80 z-[4]"
                     style={{
                         [isBlue ? 'left' : 'right']: '7px',
                         filter: 'brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,0.8))',
                     }}
                     src={getLaneIconUrl(pick.lane)} alt={pick.lane} />
             )}
-
         </div>
     );
 }
@@ -222,7 +277,7 @@ export default function OverlayPage() {
                     <>
                         {/* ── BAN SECTION ── */}
                         <div className="absolute left-0 right-0 flex items-center z-[6]" style={{ bottom: '260px', height: '72px' }}>
-                            <div className="absolute left-4 flex items-center gap-[5px]">
+                            <div className="absolute left-0 flex items-center gap-0">
                                 {(blue as TeamState).bans.map((b, i) => (
                                     <BanCard key={i} ban={b} side="blue"
                                         isActive={currentAction?.team === 'blue' && currentAction?.phase === 'ban' && currentAction?.slot === i}
@@ -230,7 +285,7 @@ export default function OverlayPage() {
                                     />
                                 ))}
                             </div>
-                            <div className="absolute right-4 flex flex-row-reverse items-center gap-[5px]">
+                            <div className="absolute right-0 flex flex-row-reverse items-center gap-0">
                                 {(red as TeamState).bans.map((b, i) => (
                                     <BanCard key={i} ban={b} side="red"
                                         isActive={currentAction?.team === 'red' && currentAction?.phase === 'ban' && currentAction?.slot === i}

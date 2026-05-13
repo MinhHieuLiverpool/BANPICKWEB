@@ -1,0 +1,412 @@
+// LOCK EFFECTS - SCSS
+// For .pick-slot--locked and lock overlays
+
+// Variables
+$gold-glow: #ffd700;
+$white: #ffffff;
+$lock-panel: #ffd200;
+$lock-panel-dark: #b88600;
+$lock-panel-hot: #fff2a1;
+$lock-panel-metal: #f6d36a;
+$lock-panel-shadow: #7a5200;
+
+// Keyframes: LOCKED (run once when locked)
+@keyframes lock-flash {
+  0% { opacity: 1; }
+  30% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+@keyframes lock-ring-expand {
+  0% {
+    box-shadow: inset 0 0 0 4px rgba($gold-glow, 1),
+                0 0 20px 6px rgba($gold-glow, 0.8);
+    opacity: 1;
+    transform: scale(1);
+  }
+  60% {
+    box-shadow: inset 0 0 0 2px rgba($gold-glow, 0.6),
+                0 0 50px 20px rgba($gold-glow, 0.3);
+    opacity: 0.7;
+    transform: scale(1.04);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0px rgba($gold-glow, 0),
+                0 0 80px 30px rgba($gold-glow, 0);
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes lock-scanlines {
+  0% { background-position: 0 0; opacity: 0.5; }
+  100% { background-position: 0 -120px; opacity: 0; }
+}
+
+@keyframes lock-burst {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes lock-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes lock-panel-left {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-140%);
+    opacity: 1;
+  }
+}
+
+@keyframes lock-panel-right {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  60% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(140%);
+    opacity: 1;
+  }
+}
+
+@keyframes lock-panel-glow {
+  0% { opacity: 0; }
+  30% { opacity: 0.6; }
+  60% { opacity: 0.2; }
+  100% { opacity: 0; }
+}
+
+@keyframes lock-streaks {
+  0% { background-position: -120% 0; opacity: 0; }
+  20% { opacity: 0.8; }
+  60% { background-position: 120% 0; opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+@keyframes lock-sheen {
+  0% { background-position: -120% 0; opacity: 0; }
+  25% { opacity: 0.9; }
+  100% { background-position: 120% 0; opacity: 0; }
+}
+
+@keyframes lock-emblem {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  35% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes lock-flare {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  25% { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+
+@keyframes lock-picked-zoom {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+// Classes: LOCKED overlays
+.pick-flash-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  background: $white;
+  animation: lock-flash 0.45s ease-out forwards;
+}
+
+.pick-ring-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 19;
+  border-radius: inherit;
+  animation: lock-ring-expand 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pick-burst-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 18;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba($gold-glow, 0.6) 0%, transparent 70%);
+  animation: lock-burst 0.65s ease-out forwards;
+}
+
+.pick-scanlines-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 17;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba($white, 0.08) 3px,
+    rgba($white, 0.08) 4px
+  );
+  background-size: 100% 8px;
+  animation: lock-scanlines 0.5s linear forwards;
+}
+
+.pick-lock-panel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 16;
+}
+
+.pick-lock-panel-left,
+.pick-lock-panel-right {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background:
+    linear-gradient(180deg, rgba($lock-panel, 0.95) 0%, rgba($lock-panel-dark, 0.95) 100%),
+    linear-gradient(90deg, rgba($white, 0.22), transparent 40%, rgba($white, 0.12) 60%, transparent 100%),
+    repeating-linear-gradient(180deg, rgba($lock-panel-shadow, 0.25), rgba($lock-panel-shadow, 0.25) 2px, transparent 2px, transparent 6px);
+}
+
+.pick-lock-panel-left {
+  left: 0;
+  animation: lock-panel-left 0.9s ease-out forwards;
+}
+
+.pick-lock-panel-right {
+  right: 0;
+  animation: lock-panel-right 0.9s ease-out forwards;
+}
+
+.pick-lock-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba($lock-panel-hot, 0.7), transparent 55%);
+  opacity: 0;
+  animation: lock-panel-glow 0.8s ease-out forwards;
+}
+
+.pick-lock-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba($white, 0.45) 50%, transparent 100%);
+  background-size: 40% 100%;
+  opacity: 0;
+  animation: lock-streaks 0.85s ease-out forwards;
+}
+
+.pick-lock-panel .pick-lock-panel-left::after,
+.pick-lock-panel .pick-lock-panel-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba($white, 0.5) 50%, transparent 100%);
+  background-size: 45% 100%;
+  opacity: 0;
+  animation: lock-sheen 0.9s ease-out forwards;
+}
+
+.pick-lock-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 21;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: #111111;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: translate(-50%, -50%) rotate(180deg);
+  font-size: clamp(30px, 7vh, 72px);
+  line-height: 1;
+  animation: lock-picked-zoom 0.7s ease-out forwards;
+}
+
+.pick-lock-text::after {
+  content: '';
+  position: absolute;
+  inset: -10% -25%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba($white, 0.65) 0%, transparent 60%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: lock-flare 0.75s ease-out forwards;
+}
+
+// Decorative frame bits
+.pick-lock-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 23;
+}
+
+.pick-lock-decor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 62%;
+  height: 62%;
+  border: 2px solid rgba($white, 0.65);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: lock-emblem 0.8s ease-out forwards;
+}
+
+.pick-lock-decor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46%;
+  height: 46%;
+  border: 1px dashed rgba($white, 0.55);
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0;
+  animation: lock-emblem 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba($white, 0.75), transparent);
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-line--top {
+  top: 12px;
+  left: 10%;
+  right: 10%;
+}
+
+.pick-lock-decor-line--bottom {
+  bottom: 12px;
+  left: 12%;
+  right: 12%;
+}
+
+.pick-lock-decor-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($white, 0.7);
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-corner--tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+.pick-lock-decor-corner--tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+.pick-lock-decor-corner--bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+.pick-lock-decor-corner--br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+.pick-lock-decor-dots {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba($white, 0.7) 0 2px, transparent 3px) 0 0 / 12px 6px repeat-x;
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-chev {
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-top: 3px solid rgba($white, 0.8);
+  border-right: 3px solid rgba($white, 0.8);
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-chev--left {
+  left: 18px;
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+.pick-lock-decor-chev--right {
+  right: 18px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.pick-lock-decor-ticks {
+  position: absolute;
+  top: 16%;
+  bottom: 16%;
+  width: 2px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba($white, 0.75),
+    rgba($white, 0.75) 6px,
+    transparent 6px,
+    transparent 14px
+  );
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+.pick-lock-decor-ticks--left { left: 26px; }
+.pick-lock-decor-ticks--right { right: 26px; }
+
+.pick-lock-decor-slasher {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba($white, 0.85), transparent);
+  transform: translate(-50%, -50%) rotate(-12deg);
+  opacity: 0;
+  animation: lock-panel-glow 0.9s ease-out forwards;
+}
+
+// Card-level lock pop
+.pick-slot--locked {
+  animation: lock-pop 0.35s ease-out;
+}
